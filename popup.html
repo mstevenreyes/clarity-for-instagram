@@ -1,19 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <style>
       body {
         font-family: Arial, sans-serif;
         padding: 12px;
-        width: 220px;
+        width: 240px;
         background: #111;
         color: #fff;
+      }
+
+      .title {
+        font-size: 16px;
+        margin-bottom: 12px;
+        font-weight: bold;
       }
 
       .container {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-bottom: 10px;
       }
 
       .label {
@@ -63,22 +70,51 @@
         transform: translateX(20px);
       }
 
-      .title {
-        font-size: 16px;
-        margin-bottom: 10px;
-        font-weight: bold;
+      .section {
+        margin-top: 10px;
+        border-top: 1px solid #222;
+        padding-top: 10px;
       }
     </style>
   </head>
 
   <body>
-    <div class="title">Unhook IG</div>
+    <div class="title">Clarity for Instagram</div>
 
+    <!-- Hide Stories -->
     <div class="container">
       <span class="label">Hide Stories</span>
-
       <label class="switch">
-        <input type="checkbox" id="toggleSwitch" />
+        <input type="checkbox" id="hideStories" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="section"></div>
+
+    <!-- Hide Feed -->
+    <div class="container">
+      <span class="label">Hide Feed</span>
+      <label class="switch">
+        <input type="checkbox" id="hideFeed" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Hide Suggested -->
+    <div class="container">
+      <span class="label">Hide Suggested</span>
+      <label class="switch">
+        <input type="checkbox" id="hideSuggested" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Inspirational Quotes -->
+    <div class="container">
+      <span class="label">Show Quotes</span>
+      <label class="switch">
+        <input type="checkbox" id="quotesMode" />
         <span class="slider"></span>
       </label>
     </div>

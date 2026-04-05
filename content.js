@@ -1,72 +1,107 @@
-let enabled = true;
+let settings = {
+  hideStories: false,
+  hideFeed: false,
+  hideSuggested: false,
+  quotesMode: false,
+};
 
 // Load initial state
-chrome.storage.sync.get(["enabled"], (result) => {
-  enabled = result.enabled ?? true;
+chrome.storage.sync.get(Object.keys(settings), (result) => {
+  settings = { ...settings, ...result };
   scheduleApply();
 });
 
-// Listen for storage changes (live sync across tabs)
+// Listen for storage changes
 chrome.storage.onChanged.addListener((changes) => {
-  if (changes.enabled) {
-    enabled = changes.enabled.newValue;
-    scheduleApply();
+  let updated = false;
+
+  for (let key in changes) {
+    if (settings.hasOwnProperty(key)) {
+      settings[key] = changes[key].newValue;
+      updated = true;
+    }
   }
+
+  if (updated) scheduleApply();
 });
 
-// Listen for popup toggle messages
+// Listen for popup messages
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === "TOGGLE") {
-    enabled = msg.enabled;
-    scheduleApply();
+  if (msg.type === "UPDATE_SETTINGS") {
+    chrome.storage.sync.get(Object.keys(settings), (result) => {
+      settings = { ...settings, ...result };
+      scheduleApply();
+    });
   }
 });
 
-// Get main story container
+// =========================
+// MAIN APPLY FUNCTION
+// =========================
+
+function applyState() {
+  if (settings.hideStories) {
+    hideStories();
+    hideStoryArrows();
+    hideStoryMenuItems();
+  } else {
+    showStories();
+  }
+
+  if (settings.hideFeed) {
+    hideFeed();
+  } else {
+    showFeed();
+  }
+
+  if (settings.hideSuggested) {
+    hideSuggested();
+  } else {
+    showSuggested();
+  }
+
+  if (settings.quotesMode) {
+    showQuotesPlaceholder();
+  } else {
+    removeQuotesPlaceholder();
+  }
+}
+
+// =========================
+// STORIES
+// =========================
+
 function getStoryContainer() {
   return document.querySelector("div[role='presentation']");
 }
 
-
-
-// Main logic handler
-function applyState() {
+function hideStories() {
   const container = getStoryContainer();
-
-  // Hide / show story modal
-  if (container) {
-    container.style.display = enabled ? "none" : "";
-  }
-
-  // Hide / show navigation arrows (IG uses buttons with SVG icons)
-  document.querySelectorAll("button").forEach((btn) => {
-    const svg = btn.querySelector("svg");
-    if (!svg) return;
-
-    const rect = btn.getBoundingClientRect();
-
-    const isSmallCircle =
-      rect.width <= 60 &&
-      rect.height <= 60;
-
-    if (isSmallCircle) {
-      btn.style.display = enabled ? "none" : "";
-    }
-  });
-
-  // Hide "Hide story", "Mute", etc. menu items
-   hideStoryArrows();      // ✅ clean + stable
-  hideStoryMenuItems();   // keep your existing function
+  if (container) container.style.display = "none";
 }
 
-// Handles menu items inside story UI
+function showStories() {
+  const container = getStoryContainer();
+  if (container) container.style.display = "";
+}
+
+function hideStoryArrows() {
+  const leftBtn = document.querySelector('button[aria-label="Go back"]');
+  const rightBtn = document.querySelector('button[aria-label="Next"]');
+
+  if (leftBtn) leftBtn.style.display = "none";
+  if (rightBtn) rightBtn.style.display = "none";
+}
+
+// =========================
+// STORY MENU ITEMS
+// =========================
+
 function hideStoryMenuItems() {
   const elements = document.querySelectorAll("div, span, button");
 
   elements.forEach((el) => {
     const text = (el.innerText || "").toLowerCase();
-
-    if (!text) return;
 
     if (
       text.includes("hide story") ||
@@ -74,25 +109,88 @@ function hideStoryMenuItems() {
       text.includes("report") ||
       text.includes("snooze")
     ) {
-      el.style.display = enabled ? "none" : "";
+      el.style.display = "none";
     }
   });
 }
 
-function hideStoryArrows() {
-  const leftBtn = document.querySelector('button[aria-label="Go back"]');
-  const rightBtn = document.querySelector('button[aria-label="Next"]');
+// =========================
+// FEED
+// =========================
 
-  if (leftBtn) {
-    leftBtn.style.display = enabled ? "none" : "";
-  }
-
-  if (rightBtn) {
-    rightBtn.style.display = enabled ? "none" : "";
-  }
+function hideFeed() {
+  const feed = document.querySelector("main");
+  if (feed) feed.style.opacity = 0;
 }
 
-// Throttle applyState to avoid excessive re-renders
+function showFeed() {
+  const feed = document.querySelector("main");
+  if (feed) feed.style.opacity = 1;
+}
+
+// =========================
+// SUGGESTED POSTS
+// =========================
+
+function hideSuggested() {
+  const posts = document.querySelectorAll("article");
+
+  posts.forEach((post) => {
+    const text = post.innerText.toLowerCase();
+
+    if (text.includes("suggested for you")) {
+      post.style.display = "none";
+    }
+  });
+}
+
+function showSuggested() {
+  const posts = document.querySelectorAll("article");
+
+  posts.forEach((post) => {
+    const text = post.innerText.toLowerCase();
+
+    if (text.includes("suggested for you")) {
+      post.style.display = "";
+    }
+  });
+}
+
+// =========================
+// QUOTES MODE (PLACEHOLDER)
+// =========================
+
+function showQuotesPlaceholder() {
+  if (document.getElementById("ig-quotes")) return;
+
+  const div = document.createElement("div");
+  div.id = "ig-quotes";
+  div.innerText = "Stay focused. Build something meaningful.";
+
+  Object.assign(div.style, {
+    position: "fixed",
+    top: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#222",
+    color: "#fff",
+    padding: "10px 16px",
+    borderRadius: "8px",
+    zIndex: "999999",
+  });
+
+  document.body.appendChild(div);
+}
+
+function removeQuotesPlaceholder() {
+  const el = document.getElementById("ig-quotes");
+  if (el) el.remove();
+}
+
+// =========================
+// PERFORMANCE
+// =========================
+
 let scheduled = false;
 
 function scheduleApply() {
@@ -106,7 +204,10 @@ function scheduleApply() {
   });
 }
 
-// Watch Instagram DOM changes
+// =========================
+// OBSERVER
+// =========================
+
 const observer = new MutationObserver(() => {
   scheduleApply();
 });

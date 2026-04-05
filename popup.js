@@ -1,24 +1,42 @@
-const toggle = document.getElementById("toggleSwitch");
+const toggles = ["hideStories", "hideFeed", "hideSuggested", "quotesMode"];
 
-// Load state
-chrome.storage.sync.get(["enabled"], (result) => {
-  const isEnabled = result.enabled ?? true;
-  toggle.checked = isEnabled;
+// =========================
+// LOAD INITIAL STATE
+// =========================
+
+chrome.storage.sync.get(toggles, (result) => {
+  toggles.forEach((key) => {
+    const el = document.getElementById(key);
+    if (!el) return;
+
+    el.checked = result[key] ?? false;
+  });
 });
 
-// When user toggles
-toggle.addEventListener("change", async () => {
-  const newState = toggle.checked;
+// =========================
+// HANDLE TOGGLE CHANGES
+// =========================
 
-  chrome.storage.sync.set({ enabled: newState });
+toggles.forEach((key) => {
+  const el = document.getElementById(key);
+  if (!el) return;
 
-  const [tab] = await chrome.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
+  el.addEventListener("change", async () => {
+    const value = el.checked;
 
-  chrome.tabs.sendMessage(tab.id, {
-    type: "TOGGLE",
-    enabled: newState,
+    // Save to storage
+    chrome.storage.sync.set({
+      [key]: value,
+    });
+
+    // Notify content script
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    chrome.tabs.sendMessage(tab.id, {
+      type: "UPDATE_SETTINGS",
+    });
   });
 });
