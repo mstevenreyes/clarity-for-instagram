@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Instagram Story Remover",
+  "name": "Clarity for Instagram: Hide Distractions",
   "version": "1.0",
   "description": "Removes Instagram stories from the UI",
   "permissions": ["scripting", "storage"],

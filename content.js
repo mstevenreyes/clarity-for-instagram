@@ -119,15 +119,26 @@ function hideStoryMenuItems() {
 // =========================
 
 function hideFeed() {
-  const feed = document.querySelector("main");
-  if (feed) feed.style.opacity = 0;
+  // Prevent duplicate style
+  if (document.getElementById("clarity-hide-feed")) return;
+
+  const style = document.createElement("style");
+  style.id = "clarity-hide-feed";
+  style.innerHTML = `
+    article {
+      display: none !important;
+    }
+  `;
+
+  document.head.appendChild(style); // <-- THIS WAS MISSING
 }
 
 function showFeed() {
-  const feed = document.querySelector("main");
-  if (feed) feed.style.opacity = 1;
+  const style = document.getElementById("clarity-hide-feed");
+  if (style) {
+    style.remove(); // removes the CSS override
+  }
 }
-
 // =========================
 // SUGGESTED POSTS
 // =========================
