@@ -5,6 +5,31 @@ let settings = {
   quotesMode: false,
 };
 
+const quotesBank = [
+  "Stay focused. Build something meaningful.",
+  "Discipline is choosing what matters most.",
+  "Your future is shaped by what you do today.",
+  "Small progress is still progress.",
+  "Protect your attention. It builds your life.",
+  "Consistency beats intensity.",
+  "Do not trade long-term peace for short-term dopamine.",
+  "You do not need more time. You need more focus.",
+  "The work you avoid is often the work that changes you.",
+  "A calm mind builds better things.",
+];
+
+let currentQuote = null;
+let previousQuotesMode = false;
+
+function getRandomQuote() {
+  const index = Math.floor(Math.random() * quotesBank.length);
+  return quotesBank[index];
+}
+
+function refreshQuote() {
+  currentQuote = getRandomQuote();
+}
+
 function isHomePage() {
   return window.location.pathname === "/";
 }
@@ -44,9 +69,16 @@ chrome.runtime.onMessage.addListener((msg) => {
 // =========================
 
 function applyState() {
-  // ❗ Only run features on homepage
+  const turnedQuotesOn = settings.quotesMode && !previousQuotesMode;
+
+  if (turnedQuotesOn || currentQuote === null) {
+    refreshQuote();
+  }
+
+  previousQuotesMode = settings.quotesMode;
+
+  // Only run features on homepage
   if (!isHomePage()) {
-    // Reset everything when NOT on homepage
     showStories();
     showFeed();
     showStoryArrows();
@@ -55,16 +87,13 @@ function applyState() {
     return;
   }
 
-  // =========================
-  // HOMEPAGE ONLY LOGIC
-  // =========================
-
   if (settings.hideStories) {
     hideStories();
     hideStoryArrows();
     hideStoryMenuItems();
   } else {
     showStories();
+    showStoryArrows();
   }
 
   if (settings.hideFeed) {
@@ -85,7 +114,6 @@ function applyState() {
     removeQuotesPlaceholder();
   }
 }
-
 // =========================
 // STORIES
 // =========================
@@ -115,8 +143,8 @@ function showStoryArrows() {
   const leftBtn = document.querySelector('button[aria-label="Go back"]');
   const rightBtn = document.querySelector('button[aria-label="Next"]');
 
-  if (leftBtn) leftBtn.style.display = "none";
-  if (rightBtn) rightBtn.style.display = "none";
+  if (leftBtn) leftBtn.style.display = "";
+  if (rightBtn) rightBtn.style.display = "";
 }
 
 // =========================
@@ -209,7 +237,7 @@ function showSuggested() {
       }
 
       if (container) {
-        container.style.display = "block";
+        container.style.display = "";
       }
     }
   });
@@ -220,11 +248,20 @@ function showSuggested() {
 // =========================
 
 function showQuotesPlaceholder() {
-  if (document.getElementById("ig-quotes")) return;
+  if (!currentQuote) {
+    refreshQuote();
+  }
+
+  const existing = document.getElementById("ig-quotes");
+
+  if (existing) {
+    existing.innerText = currentQuote;
+    return;
+  }
 
   const div = document.createElement("div");
   div.id = "ig-quotes";
-  div.innerText = "Stay focused. Build something meaningful.";
+  div.innerText = currentQuote;
 
   Object.assign(div.style, {
     position: "fixed",
@@ -236,6 +273,10 @@ function showQuotesPlaceholder() {
     padding: "10px 16px",
     borderRadius: "8px",
     zIndex: "999999",
+    maxWidth: "80%",
+    textAlign: "center",
+    fontSize: "14px",
+    lineHeight: "1.4",
   });
 
   document.body.appendChild(div);

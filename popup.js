@@ -28,13 +28,13 @@ toggles.forEach((key) => {
     chrome.storage.sync.set({
       [key]: value,
     });
-
     // Notify content script
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     });
 
+    if (!tab?.id) return;
     chrome.tabs.sendMessage(tab.id, {
       type: "UPDATE_SETTINGS",
     });
