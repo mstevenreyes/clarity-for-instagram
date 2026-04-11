@@ -5,6 +5,10 @@ let settings = {
   quotesMode: false,
 };
 
+function isHomePage() {
+  return window.location.pathname === "/";
+}
+
 // Load initial state
 chrome.storage.sync.get(Object.keys(settings), (result) => {
   settings = { ...settings, ...result };
@@ -40,6 +44,21 @@ chrome.runtime.onMessage.addListener((msg) => {
 // =========================
 
 function applyState() {
+  // ❗ Only run features on homepage
+  if (!isHomePage()) {
+    // Reset everything when NOT on homepage
+    showStories();
+    showFeed();
+    showStoryArrows();
+    showSuggested();
+    removeQuotesPlaceholder();
+    return;
+  }
+
+  // =========================
+  // HOMEPAGE ONLY LOGIC
+  // =========================
+
   if (settings.hideStories) {
     hideStories();
     hideStoryArrows();
@@ -92,6 +111,13 @@ function hideStoryArrows() {
   if (leftBtn) leftBtn.style.display = "none";
   if (rightBtn) rightBtn.style.display = "none";
 }
+function showStoryArrows() {
+  const leftBtn = document.querySelector('button[aria-label="Go back"]');
+  const rightBtn = document.querySelector('button[aria-label="Next"]');
+
+  if (leftBtn) leftBtn.style.display = "none";
+  if (rightBtn) rightBtn.style.display = "none";
+}
 
 // =========================
 // STORY MENU ITEMS
@@ -128,6 +154,10 @@ function hideFeed() {
     article {
       display: none !important;
     }
+
+    [role="progressbar"] {
+      display: none !important;
+    }
   `;
 
   document.head.appendChild(style); // <-- THIS WAS MISSING
@@ -144,25 +174,43 @@ function showFeed() {
 // =========================
 
 function hideSuggested() {
-  const posts = document.querySelectorAll("article");
+  const spans = document.querySelectorAll("span");
 
-  posts.forEach((post) => {
-    const text = post.innerText.toLowerCase();
+  spans.forEach((span) => {
+    if (span.textContent.trim() === "Suggested for you") {
+      // Go up to a reasonable parent container
+      let container = span.closest("div");
 
-    if (text.includes("suggested for you")) {
-      post.style.display = "none";
+      // Climb a few levels if needed
+      for (let i = 0; i < 2; i++) {
+        if (!container) break;
+        container = container.parentElement;
+      }
+
+      if (container) {
+        container.style.display = "none";
+      }
     }
   });
 }
 
 function showSuggested() {
-  const posts = document.querySelectorAll("article");
+  const spans = document.querySelectorAll("span");
 
-  posts.forEach((post) => {
-    const text = post.innerText.toLowerCase();
+  spans.forEach((span) => {
+    if (span.textContent.trim() === "Suggested for you") {
+      // Go up to a reasonable parent container
+      let container = span.closest("div");
 
-    if (text.includes("suggested for you")) {
-      post.style.display = "";
+      // Climb a few levels if needed
+      for (let i = 0; i < 2; i++) {
+        if (!container) break;
+        container = container.parentElement;
+      }
+
+      if (container) {
+        container.style.display = "block";
+      }
     }
   });
 }
@@ -221,6 +269,20 @@ function scheduleApply() {
 
 const observer = new MutationObserver(() => {
   scheduleApply();
+});
+
+let lastUrl = location.href;
+
+const urlObserver = new MutationObserver(() => {
+  if (location.href !== lastUrl) {
+    lastUrl = location.href;
+    scheduleApply(); // re-run logic on page change
+  }
+});
+
+urlObserver.observe(document.body, {
+  childList: true,
+  subtree: true,
 });
 
 observer.observe(document.body, {
