@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Clarity for Instagram: Hide Distractions",
+  "name": "Clarity for Instagram",
   "version": "1.0",
-  "description": "Hide distractions on Instagram including Stories, Feed posts, and Suggested users to help you stay focused.",
-  "permissions": ["scripting", "storage"],
+  "description": "Hide distractions on Instagram including Stories, Feed posts, and Suggested users to stay focused.",
+  "permissions": ["storage"],
   "host_permissions": ["https://www.instagram.com/*"],
   "action": {
     "default_popup": "popup.html"
