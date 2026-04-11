@@ -1,61 +1,76 @@
 # Clarity for Instagram
 
-Clarity for Instagram is a simple Chrome extension that removes distracting elements from the Instagram web experience.
+Clarity for Instagram is a Chrome extension that removes distracting elements from the Instagram web experience so you can browse with more focus and intention.
 
-## ✨ Current Feature
+## Features
 
 - Hide Instagram Stories
+- Hide Feed Posts
+- Hide Suggested Users
+- Quotes Mode for a cleaner, more intentional homepage experience
 
-This helps reduce visual distractions so you can focus on more intentional actions like checking messages or notifications.
+## Purpose
 
-## 🚀 Purpose
+Instagram Web can still be distracting even when you only want to check messages, notifications, or specific accounts. Clarity for Instagram reduces visual noise on the homepage by letting you hide common attention traps.
 
-Instagram’s web version can still be distracting, especially with stories constantly visible.  
-This extension aims to create a cleaner, more focused interface by removing those elements.
+## How It Works
 
-## 🧩 How It Works
+The extension runs on Instagram pages and updates the interface based on your selected settings. On the homepage, it can:
 
-The extension runs on Instagram pages and modifies the DOM to hide the Stories section when enabled.
+- hide the Stories section
+- hide feed posts
+- hide “Suggested for you” sections
+- show a rotating motivational quote overlay when Quotes Mode is enabled
 
-## ⚙️ Installation (Development)
+Changes apply dynamically without needing a page refresh.
+
+## Installation (Development)
 
 1. Clone or download this repository
-2. Open Chrome and go to: chrome://extensions/
+2. Open Chrome and go to `chrome://extensions/`
 3. Enable **Developer Mode**
 4. Click **Load unpacked**
 5. Select the project folder
 
-## 🔘 Usage
+## Usage
 
-- Use the extension toggle to enable or disable story hiding
-- Changes apply instantly without refreshing the page
+1. Open Instagram in Chrome
+2. Click the Clarity for Instagram extension icon
+3. Toggle any of the available options:
+   - Hide Stories
+   - Hide Feed
+   - Hide Suggested
+   - Quotes Mode
+4. Changes are applied instantly
 
-## 🔒 Privacy
+## Privacy
 
 Clarity for Instagram:
 
-- Does NOT collect any user data
-- Does NOT track browsing activity
-- Only runs on Instagram pages
+- does not collect user data
+- does not send data to external servers
+- does not track browsing activity outside the extension’s functionality
+- only runs on Instagram pages
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- JavaScript (Vanilla)
-- Chrome Extensions API (Manifest V3)
+- JavaScript
+- Chrome Extensions API
+- Manifest V3
 
-## 📌 Roadmap
+## Roadmap
 
-Planned improvements:
+Planned improvements may include:
 
-- Hide news feed
-- Hide reels
-- More granular controls
-- UI improvements
+- more stable DOM targeting for Instagram UI changes
+- more granular controls for different page sections
+- interface refinements
+- additional focus-oriented customization
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This project is not affiliated with Instagram or Meta.
 
-## 👤 Author
+## Author
 
 Mark Steven Reyes
