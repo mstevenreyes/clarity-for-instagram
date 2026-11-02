@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Clarity for Instagram",
-  "version": "1.0",
+  "name": "Clarity for Instagram: Remove Instagram Feed and Stories",
+  "version": "1.1.1",
   "description": "Hide distractions on Instagram including Stories, Feed posts, and Suggested users to stay focused.",
   "permissions": ["storage"],
   "host_permissions": ["https://www.instagram.com/*"],

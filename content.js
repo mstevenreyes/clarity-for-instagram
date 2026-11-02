@@ -6,16 +6,66 @@ let settings = {
 };
 
 const quotesBank = [
-  "Stay focused. Build something meaningful.",
-  "Discipline is choosing what matters most.",
-  "Your future is shaped by what you do today.",
-  "Small progress is still progress.",
-  "Protect your attention. It builds your life.",
-  "Consistency beats intensity.",
-  "Do not trade long-term peace for short-term dopamine.",
-  "You do not need more time. You need more focus.",
-  "The work you avoid is often the work that changes you.",
-  "A calm mind builds better things.",
+  {
+    quote: "You have power over your mind - not outside events. Realize this, and you will find strength.",
+    author: "Marcus Aurelius"
+  },
+  {
+    quote: "We suffer more often in imagination than in reality.",
+    author: "Seneca"
+  },
+  {
+    quote: "No man is free who is not master of himself.",
+    author: "Epictetus"
+  },
+  {
+    quote: "He who has a why to live can bear almost any how.",
+    author: "Friedrich Nietzsche"
+  },
+  {
+    quote: "Attention is the rarest and purest form of generosity.",
+    author: "Simone Weil"
+  },
+  {
+    quote: "The energy of the mind is the essence of life.",
+    author: "Aristotle"
+  },
+  {
+    quote: "Beware the barrenness of a busy life.",
+    author: "Socrates"
+  },
+  {
+    quote: "Life is available only in the present moment.",
+    author: "Thich Nhat Hanh"
+  },
+  {
+    quote: "To be aware of a single shortcoming in oneself is more useful than to be aware of a thousand in someone else.",
+    author: "Dalai Lama"
+  },
+  {
+    quote: "Waste no more time arguing about what a good man should be. Be one.",
+    author: "Marcus Aurelius"
+  },
+  {
+    quote: "The soul becomes dyed with the color of its thoughts.",
+    author: "Marcus Aurelius"
+  },
+  {
+    quote: "It is not that we have a short time to live, but that we waste a lot of it.",
+    author: "Seneca"
+  },
+  {
+    quote: "An unexamined life is not worth living.",
+    author: "Socrates"
+  },
+  {
+    quote: "The mind is everything. What you think you become.",
+    author: "Buddha"
+  },
+  {
+    quote: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    author: "Will Durant"
+  }
 ];
 
 let currentQuote = null;
@@ -83,7 +133,7 @@ function applyState() {
     showFeed();
     showStoryArrows();
     showSuggested();
-    removeQuotesPlaceholder();
+    removeQuotesContainer();
     return;
   }
 
@@ -109,11 +159,12 @@ function applyState() {
   }
 
   if (settings.quotesMode) {
-    showQuotesPlaceholder();
+    showQuotesInFeed();
   } else {
-    removeQuotesPlaceholder();
+    removeQuotesContainer();
   }
 }
+
 // =========================
 // STORIES
 // =========================
@@ -139,6 +190,7 @@ function hideStoryArrows() {
   if (leftBtn) leftBtn.style.display = "none";
   if (rightBtn) rightBtn.style.display = "none";
 }
+
 function showStoryArrows() {
   const leftBtn = document.querySelector('button[aria-label="Go back"]');
   const rightBtn = document.querySelector('button[aria-label="Next"]');
@@ -173,7 +225,6 @@ function hideStoryMenuItems() {
 // =========================
 
 function hideFeed() {
-  // Prevent duplicate style
   if (document.getElementById("clarity-hide-feed")) return;
 
   const style = document.createElement("style");
@@ -188,15 +239,16 @@ function hideFeed() {
     }
   `;
 
-  document.head.appendChild(style); // <-- THIS WAS MISSING
+  document.head.appendChild(style);
 }
 
 function showFeed() {
   const style = document.getElementById("clarity-hide-feed");
   if (style) {
-    style.remove(); // removes the CSS override
+    style.remove();
   }
 }
+
 // =========================
 // SUGGESTED POSTS
 // =========================
@@ -206,10 +258,8 @@ function hideSuggested() {
 
   spans.forEach((span) => {
     if (span.textContent.trim() === "Suggested for you") {
-      // Go up to a reasonable parent container
       let container = span.closest("div");
 
-      // Climb a few levels if needed
       for (let i = 0; i < 2; i++) {
         if (!container) break;
         container = container.parentElement;
@@ -227,10 +277,8 @@ function showSuggested() {
 
   spans.forEach((span) => {
     if (span.textContent.trim() === "Suggested for you") {
-      // Go up to a reasonable parent container
       let container = span.closest("div");
 
-      // Climb a few levels if needed
       for (let i = 0; i < 2; i++) {
         if (!container) break;
         container = container.parentElement;
@@ -244,46 +292,80 @@ function showSuggested() {
 }
 
 // =========================
-// QUOTES MODE (PLACEHOLDER)
+// QUOTES MODE (IN FEED)
 // =========================
 
-function showQuotesPlaceholder() {
+function getFeedParent() {
+  const firstArticle = document.querySelector("article");
+  if (firstArticle && firstArticle.parentElement) {
+    return firstArticle.parentElement;
+  }
+  const main = document.querySelector("main");
+  if (main) return main;
+  return document.body;
+}
+
+function showQuotesInFeed() {
   if (!currentQuote) {
     refreshQuote();
   }
 
-  const existing = document.getElementById("ig-quotes");
+  let container = document.getElementById("ig-quotes-feed-container");
 
-  if (existing) {
-    existing.innerText = currentQuote;
-    return;
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "ig-quotes-feed-container";
+
+    Object.assign(container.style, {
+      margin: "24px auto",
+      padding: "32px 24px",
+      maxWidth: "470px",
+      width: "100%",
+      boxSizing: "border-box",
+      backgroundColor: "var(--ig-secondary-background, #121212)",
+      border: "1px solid var(--ig-elevated-separator, #262626)",
+      borderRadius: "12px",
+      textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    });
+
+    const quoteEl = document.createElement("p");
+    quoteEl.id = "ig-quote-text";
+    Object.assign(quoteEl.style, {
+      margin: "0 0 16px 0",
+      fontSize: "18px",
+      lineHeight: "1.6",
+      fontWeight: "400",
+      fontStyle: "italic",
+      color: "var(--ig-primary-text, #f5f5f5)",
+    });
+
+    const authorEl = document.createElement("p");
+    authorEl.id = "ig-quote-author";
+    Object.assign(authorEl.style, {
+      margin: "0",
+      fontSize: "14px",
+      fontWeight: "600",
+      letterSpacing: "0.5px",
+      color: "var(--ig-secondary-text, #a8a8a8)",
+    });
+
+    container.appendChild(quoteEl);
+    container.appendChild(authorEl);
+
+    const targetParent = getFeedParent();
+    targetParent.prepend(container);
   }
 
-  const div = document.createElement("div");
-  div.id = "ig-quotes";
-  div.innerText = currentQuote;
+  const quoteEl = document.getElementById("ig-quote-text");
+  const authorEl = document.getElementById("ig-quote-author");
 
-  Object.assign(div.style, {
-    position: "fixed",
-    top: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#222",
-    color: "#fff",
-    padding: "10px 16px",
-    borderRadius: "8px",
-    zIndex: "999999",
-    maxWidth: "80%",
-    textAlign: "center",
-    fontSize: "14px",
-    lineHeight: "1.4",
-  });
-
-  document.body.appendChild(div);
+  if (quoteEl) quoteEl.innerText = `"${currentQuote.quote}"`;
+  if (authorEl) authorEl.innerText = `~ ${currentQuote.author}`;
 }
 
-function removeQuotesPlaceholder() {
-  const el = document.getElementById("ig-quotes");
+function removeQuotesContainer() {
+  const el = document.getElementById("ig-quotes-feed-container");
   if (el) el.remove();
 }
 
@@ -317,7 +399,7 @@ let lastUrl = location.href;
 const urlObserver = new MutationObserver(() => {
   if (location.href !== lastUrl) {
     lastUrl = location.href;
-    scheduleApply(); // re-run logic on page change
+    scheduleApply();
   }
 });
 
